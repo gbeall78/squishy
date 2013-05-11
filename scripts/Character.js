@@ -1,49 +1,95 @@
-function Character(imageFile){
+function Character(id, imageFile){
   "use strict";
 
-  var self                = this;
   var alive               = true;
-  var toon                = document.createElement("div");
+  var self                = this;
+  this.node               = document.createElement("div");
   var drawSpeed           = 100;
-  var xPos                = 0;
+  var moveSpeed           = 10;
+  var spriteMapXPosition  = 0;
+  var spriteImageWidth    = 48;
+  var spriteImageHeight   = 48;
   var down                = true;
+  var xPosition           = 0;
+  var yPosition           = 0;
 
-  var spawn = function(imageFile) {
-    toon.id = "player";
-    toon.style.backgroundImage = "url(" + imageFile + ")";
-    toon.style.backgroundPosition = xPos + "px 0px";
-    toon.style.width = 48;
-    toon.style.height = 48;
-    var body = document.getElementsByTagName("body");
-    document.body.appendChild(toon);
-  }(imageFile)
+  this.spawn = function(id, imageFile) {
+    this.node.id = id;
+    this.node.style.backgroundImage = "url(" + imageFile + ")";
+    this.node.style.backgroundPosition = spriteMapXPosition + "px 0px";
+  }
 
   this.bounce = function(){
-    if(xPos <= 48){
+    if(spriteMapXPosition <= spriteImageWidth){
       down = true;
-    }else if(xPos >= 192){
+    }else if(spriteMapXPosition >= 192){
       down = false;
     }
     
     if(down){
-      xPos += 48;
+      spriteMapXPosition += spriteImageWidth;
     }else if(!down){
-      xPos -= 48;
+      spriteMapXPosition -= spriteImageWidth;
     }
 
-    toon.style.backgroundPosition = xPos + "px 0px";
+    this.node.style.backgroundPosition = spriteMapXPosition + "px 0px";
     if(alive){
       setTimeout(function(){ self.bounce(); }, drawSpeed);
     }
   };
 
-  this.jump  = function(){};
+  this.move = function(direction, increment){
+    if(increment <= 0){
+      return false;
+    }else{
+      increment--;
+    }
+
+    switch(direction.toLowerCase()){
+      case 'right':
+        if(!this.right()){
+          return false;
+        }
+        break;
+      case 'left':
+        if(!this.left()){
+          return false;
+        }
+        break;
+      case 'jump':
+        if(!this.jump()){
+          return false;
+        }
+        break;
+      default:
+    }
+
+    if(self.move){
+      setTimeout(function(){ self.move(direction, increment); }, moveSpeed);
+    }
+
+  }
+
+  this.right = function(){
+    if( (xPosition + 1) < screen.availWidth - spriteImageWidth){
+      xPosition++;
+      this.node.style.left = xPosition;
+      return true;
+    }
+    return false;
+  }
+
+  this.left = function(){
+    if( (xPosition - 1) > 0){
+      xPosition--;
+      this.node.style.left = xPosition;
+      return true;
+    }
+    return false;
+  }
+
+  this.jump  = function(){
+    yPosition++;
+  };
+
 }
-
-function test(){
-  var toon1 = new Character(IMAGE_PATH + "smileySprite.png");
-
-  toon1.bounce();
-}
-
-//window.onload = test();
