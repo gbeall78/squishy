@@ -1,0 +1,10 @@
+div[id^="player_"] {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  top: 50px ;
+}
+
+div[id^="npc_"]{}
+div[id^="monster_"]{}
+div[id^="boss_"]{}
