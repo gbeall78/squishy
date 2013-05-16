@@ -1,3 +1,11 @@
+canvas {
+  display: block;
+  width: 640px;
+  height: 480px;
+  margin: 0 auto;
+  border: 1px black solid;
+}
+
 div[id^="player_"] {
   position: absolute;
   width: 48px;

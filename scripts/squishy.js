@@ -6,9 +6,13 @@ var game = ( function() {
 
   return {
     run: function(){
-      player.spawn("player_1", IMAGE_PATH + "smileySprite.png");
-      player.bounce();  //This should be move into the Character class.
-      document.body.appendChild(player.node);
+      var gameboard = document.querySelector("canvas").getContext("2d");
+      
+      player.spawn(gameboard, IMAGE_PATH + "smileySprite.png");
+      
+      //player.spawn("player_1", IMAGE_PATH + "smileySprite.png");
+      //player.bounce();  //This should be move into the Character class.
+      //document.body.appendChild(player.node);
     },
     userInput: function(input){
       switch(input.which){

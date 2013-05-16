@@ -3,20 +3,29 @@ function Character(id, imageFile){
 
   var alive               = true;
   var self                = this;
+  this.img                = new Image();
   this.node               = document.createElement("div");
   var drawSpeed           = 100;
   var moveSpeed           = 10;
   var spriteMapXPosition  = 0;
+  var spriteMapYPosition  = 0;
   var spriteImageWidth    = 48;
   var spriteImageHeight   = 48;
   var down                = true;
   var xPosition           = 0;
   var yPosition           = 0;
 
+  /*
   this.spawn = function(id, imageFile) {
     this.node.id = id;
     this.node.style.backgroundImage = "url(" + imageFile + ")";
     this.node.style.backgroundPosition = spriteMapXPosition + "px 0px";
+  }
+  */
+
+  this.spawn = function (gameboard, imageFile) {
+    this.img.src = imageFile;
+    gameboard.drawImage(this.img, spriteMapXPosition, spriteMapYPosition, spriteImageHeight, spriteImageWidth);
   }
 
   this.bounce = function(){
