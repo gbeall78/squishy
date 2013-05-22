@@ -1,16 +1,31 @@
-canvas {
-  display: block;
-  width: 640px;
-  height: 480px;
+#container {
+  position: relative;
   margin: 0 auto;
   border: 1px black solid;
+  z-index: -9999;
 }
 
-div[id^="player_"] {
+canvas {
   position: absolute;
+  display: block;
+}
+
+#container, 
+canvas[id^="gameboard"] {
+  width: 800px;
+}
+
+#container, 
+canvas {
+  height: 200px;
+}
+
+canvas[id^="gameboard"] {
+  z-index: -10;
+}
+
+canvas[id^="player"] {
   width: 48px;
-  height: 48px;
-  top: 50px ;
 }
 
 div[id^="npc_"]{}
