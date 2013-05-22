@@ -1,110 +1,116 @@
-function Character(id, imageFile){
+function Character(id, imageFile, startYPosition){
   "use strict";
 
-  var alive               = true;
-  var self                = this;
-  this.img                = new Image();
-  this.node               = document.createElement("div");
-  var drawSpeed           = 100;
-  var moveSpeed           = 10;
-  var spriteMapXPosition  = 384;
-  var spriteMapYPosition  = 0;
-  var spriteImageWidth    = 48;
-  var spriteImageHeight   = 48;
-  var xPosition           = 0;
-  var yPosition           = 0;
-  var toggleDirection     = false;
+  var self                  = this;
+  this.alive                = true;
+  this.img                  = new Image();
+  this.id                   = "";
+  this.canvas               = document.createElement("canvas");
+  this.context              = "";
+  this.drawSpeed            = 100;
+  this.moveSpeed            = 10;
+  this.spriteMapXPosition   = 384;
+  this.spriteMapYPosition   = 0;
+  this.spriteImageWidth     = 48;
+  this.spriteImageHeight    = 48;
+  this.xPosition            = 0;
+  this.yPosition            = 0;
+  this.toggleDirection      = false;
 
+  var container = document.getElementById("container");
 
-  /*
-  this.spawn = function(id, imageFile) {
-    this.node.id = id;
-    this.node.style.backgroundImage = "url(" + imageFile + ")";
-    this.node.style.backgroundPosition = spriteMapXPosition + "px 0px";
-  }
-  */
-
-  this.spawn = function (gameboard, imageFile, startPosition) {
-    this.img.src = imageFile;
-    this.yPosition = startPosition - spriteImageHeight;
-    gameboard.drawImage(this.img, 384, 0, 48, 48, xPosition, this.yPosition, 48, 48);
-    self.bounce(gameboard);
-  }
-
-  this.bounce = function(gameboard){
-
-    gameboard.clearRect(0, 0, gameboard.canvas.clientWidth, gameboard.canvas.clientHeight);
-
-    if(spriteMapXPosition <= 248){
-      toggleDirection = true ;
-    }else if(spriteMapXPosition >= 384){
-      toggleDirection = false;
-    }
-
-    if(toggleDirection){
-      spriteMapXPosition += spriteImageWidth;
-    }else{
-      spriteMapXPosition -= spriteImageWidth;
-    }
+  this.id = id;
+  this.canvas.id = id;
+  container.appendChild(this.canvas);
+  this.context = document.getElementById(this.id).getContext("2d");
+  this.canvas.width = this.canvas.clientWidth;
+  this.canvas.height = this.canvas.clientHeight;
     
-    gameboard.drawImage(this.img, spriteMapXPosition, 0, 48, 48, xPosition, this.yPosition, 48, 48);
-    if(alive){
-      setTimeout(function(){ self.bounce(gameboard); }, drawSpeed);
-    }
-  };
+  this.img.src = imageFile;
+  this.yPosition = startYPosition - this.spriteImageHeight;
+  this.context.drawImage(this.img, 384, 0, 48, 48, this.xPosition, this.yPosition, 48, 48);
+  this.canvas.style.zIndex = "1";
+  self.bounce();
 
-  this.move = function(direction, increment){
-    if(increment <= 0){
-      return false;
-    }else{
-      increment--;
-    }
+};
 
-    switch(direction.toLowerCase()){
-      case 'right':
-        if(!this.right()){
-          return false;
-        }
-        break;
-      case 'left':
-        if(!this.left()){
-          return false;
-        }
-        break;
-      case 'jump':
-        if(!this.jump()){
-          return false;
-        }
-        break;
-      default:
-    }
+Character.prototype.bounce = function(){
+  "use strict";
 
-    if(self.move){
-      setTimeout(function(){ self.move(direction, increment); }, moveSpeed);
-    }
+  var self                  = this;
+  this.context.clearRect(0, 0, this.context.canvas.clientWidth, this.context.canvas.clientHeight);
 
+  if(this.spriteMapXPosition <= 248){
+    this.toggleDirection = true ;
+  }else if(this.spriteMapXPosition >= 384){
+    this.toggleDirection = false;
   }
 
-  this.right = function(){
-    if( (xPosition + 1) < screen.availWidth - spriteImageWidth){
+  if(this.toggleDirection){
+    this.spriteMapXPosition += this.spriteImageWidth;
+  }else{
+    this.spriteMapXPosition -= this.spriteImageWidth;
+  }
+  
+  this.context.drawImage(this.img, this.spriteMapXPosition, 0, 48, 48, this.xPosition, this.yPosition, 48, 48);
+  if(this.alive){
+    setTimeout(function(){ self.bounce(); }, this.drawSpeed);
+  }
+};
+
+Character.prototype.move = function(direction, increment){
+  "use strict";
+  if(increment <= 0){
+    return false;
+  }else{
+    increment--;
+  }
+
+  switch(direction.toLowerCase()){
+    case 'right':
+      if(!this.right()){
+        return false;
+      }
+      break;
+    case 'left':
+      if(!this.left()){
+        return false;
+      }
+      break;
+    case 'jump':
+      if(!this.jump()){
+        return false;
+      }
+      break;
+    default:
+  }
+
+  if(self.move){
+    setTimeout(function(){ self.move(direction, increment); }, moveSpeed);
+  }
+};
+
+Character.prototype.right = function(){
+  "use strict";
+    if( (this.xPosition + 1) < screen.availWidth - this.spriteImageWidth){
       xPosition++;
-      this.node.style.left = xPosition;
+      this.node.style.left = this.xPosition;
       return true;
     }
     return false;
-  }
+};
 
-  this.left = function(){
+Character.prototype.left = function(){
+  "use strict";
     if( (xPosition - 1) > 0){
       xPosition--;
       this.node.style.left = xPosition;
       return true;
     }
     return false;
-  }
+};
 
-  this.jump  = function(){
+Character.prototype.jump  = function(){
+  "use strict";
     yPosition++;
-  };
-
-}
+};
