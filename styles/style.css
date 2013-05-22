@@ -11,13 +11,9 @@ canvas {
 }
 
 #container, 
-canvas[id^="gameboard"] {
-  width: 800px;
-}
-
-#container, 
 canvas {
   height: 200px;
+  width: 800px;
 }
 
 canvas[id^="gameboard"] {
@@ -25,7 +21,6 @@ canvas[id^="gameboard"] {
 }
 
 canvas[id^="player"] {
-  width: 48px;
 }
 
 div[id^="npc_"]{}

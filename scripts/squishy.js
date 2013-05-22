@@ -27,22 +27,40 @@ var game = ( function() {
       player = new Character("player", IMAGE_PATH + "smileySprite.png", level.floor);
       
     },
-    userInput: function(input){
-      switch(input.which){
+
+    userInput: function(e){
+      switch(e.which){
         case 37:  //left arrow
         case 65:  //a key
-          player.move('Left', 16);
+          player.left = true;
           break;
         case 39:  //right arrow
         case 68:  //d key
-          player.move('Right', 16);
+          player.right = true;
           break;
         case 32:
-          player.move('jump', 32);
+          player.jump = true;
+        default:
+      }
+    },
+
+    noUserInput: function(e){
+      switch(e.which){
+        case 37:  //left arrow
+        case 65:  //a key
+          player.left = false;
+          break;
+        case 39:  //right arrow
+        case 68:  //d key
+          player.right = false;
+          break;
+        case 32:
+          player.jump = false;
         default:
       }
     }
   }
 }() );
 
-window.onkeydown = function(e){ game.userInput(e) };
+window.addEventListener("keydown",  function(e) { game.userInput(e); }, false);
+window.addEventListener("keyup",  function(e) { game.noUserInput(e); }, false);
