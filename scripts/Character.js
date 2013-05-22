@@ -8,14 +8,24 @@ function Character(id, imageFile, startYPosition){
   this.canvas               = document.createElement("canvas");
   this.context              = "";
   this.drawSpeed            = 100;
-  this.moveSpeed            = 10;
   this.spriteMapXPosition   = 384;
   this.spriteMapYPosition   = 0;
   this.spriteImageWidth     = 48;
   this.spriteImageHeight    = 48;
   this.xPosition            = 0;
   this.yPosition            = 0;
+  this.xVelocity            = 0;
+  this.yVelocity            = 0;
+  this.xAcceleration        = 1;
+  this.yAcceleration        = 0.2;
+  this.speedLimit           = 5;
+  this.rebound              = -0.7;
+  this.gravity              = 0.3;
   this.toggleDirection      = false;
+  this.left                 = false;
+  this.right                = false;
+  this.jump                 = false;
+  this.onGround             = undefined;
 
   var container = document.getElementById("container");
 
@@ -30,7 +40,7 @@ function Character(id, imageFile, startYPosition){
   this.yPosition = startYPosition - this.spriteImageHeight;
   this.context.drawImage(this.img, 384, 0, 48, 48, this.xPosition, this.yPosition, 48, 48);
   this.canvas.style.zIndex = "1";
-  self.bounce();
+  this.bounce();
 
 };
 
@@ -52,65 +62,34 @@ Character.prototype.bounce = function(){
     this.spriteMapXPosition -= this.spriteImageWidth;
   }
   
-  this.context.drawImage(this.img, this.spriteMapXPosition, 0, 48, 48, this.xPosition, this.yPosition, 48, 48);
+  this.draw();
   if(this.alive){
     setTimeout(function(){ self.bounce(); }, this.drawSpeed);
   }
 };
 
-Character.prototype.move = function(direction, increment){
+Character.prototype.draw = function(){
   "use strict";
-  if(increment <= 0){
-    return false;
-  }else{
-    increment--;
+
+  if(!this.left && !this.right){
+    this.xVelocity = 0;
+  }else if(this.left && !this.right){
+    this.xVelocity -= this.xAcceleration;
+  }else if(this.right && !this.left){
+    this.xVelocity += this.xAcceleration;
   }
 
-  switch(direction.toLowerCase()){
-    case 'right':
-      if(!this.right()){
-        return false;
-      }
-      break;
-    case 'left':
-      if(!this.left()){
-        return false;
-      }
-      break;
-    case 'jump':
-      if(!this.jump()){
-        return false;
-      }
-      break;
-    default:
+  if(this.xVelocity > this.speedLimit){
+    this.xVelocity = this.speedLimit;
+  }else if(this.xVelocity < -this.speedLimit){
+    this.xVelocity = -this.speedLimit;
   }
 
-  if(self.move){
-    setTimeout(function(){ self.move(direction, increment); }, moveSpeed);
+  var checkMoveX = this.xPosition + this.xVelocity;
+
+  if(checkMoveX >= 0 && checkMoveX <= this.canvas.width - this.spriteImageWidth){
+    this.xPosition = checkMoveX;
   }
-};
 
-Character.prototype.right = function(){
-  "use strict";
-    if( (this.xPosition + 1) < screen.availWidth - this.spriteImageWidth){
-      xPosition++;
-      this.node.style.left = this.xPosition;
-      return true;
-    }
-    return false;
-};
-
-Character.prototype.left = function(){
-  "use strict";
-    if( (xPosition - 1) > 0){
-      xPosition--;
-      this.node.style.left = xPosition;
-      return true;
-    }
-    return false;
-};
-
-Character.prototype.jump  = function(){
-  "use strict";
-    yPosition++;
+  this.context.drawImage(this.img, this.spriteMapXPosition, 0, 48, 48, this.xPosition, this.yPosition, 48, 48);
 };
