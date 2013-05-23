@@ -7,7 +7,7 @@ var game = ( function() {
   function getLevel(level){
     var request = new XMLHttpRequest();
 
-    request.open("GET", "json/level" + level + ".json", false);
+    request.open("GET", "json/level/" + level + ".json", false);
     request.send();
 
     return JSON.parse(request.responseText);
