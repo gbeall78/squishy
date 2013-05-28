@@ -1,13 +1,13 @@
-var game = ( function() {
+var game = (function() {
   "use strict";
   
   var body          = document.getElementsByTagName("body");
   var player        = {};
 
-  function getLevel(level){
+  function getJson(file){
     var request = new XMLHttpRequest();
 
-    request.open("GET", "json/level/" + level + ".json", false);
+    request.open("GET", "json/" + file + ".json", false);
     request.send();
 
     return JSON.parse(request.responseText);
@@ -17,14 +17,15 @@ var game = ( function() {
     run: function(){
       var gameboard = document.getElementById("gameboard").getContext("2d");
 
-      var level = getLevel(1);
+      var playerData = getJson("player");
+      var level = getJson("level/1");
       
       gameboard.canvas.height = gameboard.canvas.clientHeight;
       gameboard.canvas.width = gameboard.canvas.clientWidth;
 
       //load level.
 
-      player = new Character("player", IMAGE_PATH + "smileySprite.png", level.floor);
+      player = new Character(playerData, level.floor);
       
     },
 
@@ -40,7 +41,9 @@ var game = ( function() {
           break;
         case 32:
           player.jump = true;
+          break;
         default:
+          break;
       }
     },
 
@@ -56,11 +59,13 @@ var game = ( function() {
           break;
         case 32:
           player.jump = false;
+          break;
         default:
+          break;
       }
     }
-  }
-}() );
+  };
+}());
 
 window.addEventListener("keydown",  function(e) { game.userInput(e); }, false);
 window.addEventListener("keyup",  function(e) { game.noUserInput(e); }, false);

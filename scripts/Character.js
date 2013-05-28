@@ -1,17 +1,17 @@
-function Character(id, imageFile, startYPosition){
+function Character(cData, startYPosition){
   "use strict";
 
   var self                  = this;
   this.alive                = true;
   this.img                  = new Image();
-  this.id                   = "";
+  this.id                   = cData.name;
   this.canvas               = document.createElement("canvas");
   this.context              = "";
   this.drawSpeed            = 100;
-  this.spriteMapXPosition   = 384;
-  this.spriteMapYPosition   = 0;
-  this.spriteImageWidth     = 48;
-  this.spriteImageHeight    = 48;
+  this.spriteMapXPosition   = cData.animation.x;
+  this.spriteMapYPosition   = cData.animation.y;
+  this.spriteImageWidth     = cData.animation.width;
+  this.spriteImageHeight    = cData.animation.height;
   this.xPosition            = 0;
   this.yPosition            = 0;
 
@@ -34,26 +34,22 @@ function Character(id, imageFile, startYPosition){
   var container = document.getElementById("container");
 
   // Setup canvas and it's parameters, then create the context.
-  this.id = id;
-  this.canvas.id = id;
+  this.canvas.id = this.id;
   container.appendChild(this.canvas);
   this.context = document.getElementById(this.id).getContext("2d");
   this.canvas.width = this.canvas.clientWidth;
   this.canvas.height = this.canvas.clientHeight;
     
-  this.img.src = imageFile;
+  this.img.src = IMAGE_PATH + cData.imgFile;
   this.yPosition = startYPosition - this.spriteImageHeight;
   this.canvas.style.zIndex = "1";
 
   // Start animation.
   this.bounce();
-};
+}
 
-/*
- * Cycles through the sprite sheet printing the bounce animation.
- * Then calls the draw function to redraw the canvas.
- *
- */
+// Cycles through the sprite sheet printing the bounce animation.
+// Then calls the draw function to redraw the canvas.
 Character.prototype.bounce = function(){
   "use strict";
 
@@ -88,10 +84,8 @@ Character.prototype.bounce = function(){
   }
 };
 
-/*
- * Controls where the image is placed on the canvas and the outputs it to the canvas.
- * Placement is determined by keyboard interaction.
- */
+// Controls where the image is placed on the canvas and the outputs it to the canvas.
+// Placement is determined by keyboard interaction.
 
 Character.prototype.draw = function(){
   "use strict";
@@ -172,6 +166,5 @@ Character.prototype.draw = function(){
   this.context.drawImage(
       this.img, 
       this.spriteMapXPosition, 0, this.spriteImageWidth, this.spriteImageHeight, 
-      this.xPosition, this.yPosition, this.spriteImageWidth, this.spriteImageHeight
-  );
+      this.xPosition, this.yPosition, this.spriteImageWidth, this.spriteImageHeight );
 };

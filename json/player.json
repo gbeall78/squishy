@@ -1,3 +1,16 @@
 {
-
+  "name" : "player",
+  "imgFile" : "smileySprite.png",
+  "animation" : {
+    "x" : 384,
+    "y" : 0,
+    "width" : 48,
+    "height" : 48
+  },
+  "physics" : {
+  },
+  "attack" : {
+  },
+  "defend" : {
+  }
 }
