@@ -1,170 +1,169 @@
-function Character(cData, startYPosition){
+var character = function (cData, startYPosition){
   "use strict";
 
-  var self                  = this;
-  this.alive                = true;
-  this.img                  = new Image();
-  this.id                   = cData.name;
-  this.canvas               = document.createElement("canvas");
-  this.context              = "";
-  this.drawSpeed            = 100;
-  this.spriteMapXPosition   = cData.animation.x;
-  this.spriteMapYPosition   = cData.animation.y;
-  this.spriteImageWidth     = cData.animation.width;
-  this.spriteImageHeight    = cData.animation.height;
-  this.xPosition            = 0;
-  this.yPosition            = 0;
+  // Private variables
+  var that                  = {};
+  var alive                 = true;
+  var img                   = new Image();
+  var canvas                = document.createElement("canvas");
+  var context              = "";
+  
+  var drawSpeed            = 100;
+  var xPosition            = 0;
+  var yPosition            = 0;
+  var toggleDirection      = false;
+  var spriteMapXPosition    = cData.animation.x
+  var spriteMapYPosition    = cData.animation.y
 
   //Physics & movement settings
-  this.xVelocity            = 0;
-  this.yVelocity            = 0;
-  this.xAcceleration        = 2;
-  this.yAcceleration        = 2;
-  this.speedLimit           = 8;
-  this.friction             = 0.90;
-  this.rebound              = -0.7;
-  this.jumpForce            = -20;
-  this.gravity              = 2;
-  this.toggleDirection      = false;
-  this.left                 = false;
-  this.right                = false;
-  this.jump                 = false;
-  this.onGround             = undefined;
+  var xVelocity            = 0;
+  var yVelocity            = 0;
+  var xAcceleration        = 2;
+  var yAcceleration        = 2;
+  var speedLimit           = 8;
+  var friction             = 0.90;
+  var rebound              = -0.7;
+  var jumpForce            = -20;
+  var gravity              = 2;
+  var onGround             = undefined;
+
+  that.left                 = false;
+  that.right                = false;
+  that.jump                 = false;
 
   var container = document.getElementById("container");
 
   // Setup canvas and it's parameters, then create the context.
-  this.canvas.id = this.id;
-  container.appendChild(this.canvas);
-  this.context = document.getElementById(this.id).getContext("2d");
-  this.canvas.width = this.canvas.clientWidth;
-  this.canvas.height = this.canvas.clientHeight;
+  canvas.id = cData.name;
+  container.appendChild(canvas);
+  context = document.getElementById(cData.name).getContext("2d");
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
     
-  this.img.src = IMAGE_PATH + cData.imgFile;
-  this.yPosition = startYPosition - this.spriteImageHeight;
-  this.canvas.style.zIndex = "1";
+  img.src = IMAGE_PATH + cData.imgFile;
+  yPosition = startYPosition - cData.animation.height;
+  canvas.style.zIndex = "1";
 
-  // Start animation.
-  this.bounce();
-}
+
+  // Controls where the image is placed on the canvas and the outputs it to the canvas.
+  // Placement is determined by keyboard interaction.
+
+  var draw = function(){
+
+    // If no left/right input has been pressed set friction to slow down.
+    if(!that.left && !that.right){
+      friction = 0.90;
+    }else{
+      friction = 1;
+    }
+
+    // If jump was pressed while on the ground,
+    // jump and let everyone know we aren't on the ground.
+    // Also cancel friction while in the air (gravity is all
+    // that matters).
+    if(that.jump && onGround){
+      yVelocity += jumpForce;
+      onGround = false;
+      friction = 1;
+    }
+
+    // Increment the acceleration left/right for a smoother experience.
+    if(that.left && !that.right){
+      xVelocity -= xAcceleration;
+    }else if(that.right && !that.left){
+      xVelocity += xAcceleration;
+    }
+
+    //Apply friction if we are on the ground.
+    if(onGround){
+      xVelocity *= friction;
+    }
+    yVelocity += gravity;
+
+    // Check if we are travelling at the maximum speed and
+    // if so refrain from increasing further.
+    // For that.jumping be more relaxed
+    if(xVelocity > speedLimit){
+      xVelocity = speedLimit;
+    }else if(xVelocity < -speedLimit){
+      xVelocity = -speedLimit;
+    }else if(yVelocity > speedLimit * 2){
+      yVelocity = speedLimit * 2;
+    }
+
+    // Set the new positions.
+    var checkMoveX = xPosition + xVelocity;
+    var checkMoveY = yPosition + yVelocity;
+
+    // Check whether the new X-positions exceed boundaries.
+    // If the do rebound
+    if(checkMoveX < 0){
+      xVelocity *= rebound;
+      xPosition = 0;
+    }else if(checkMoveX > canvas.width - cData.animation.width){
+      xVelocity *= rebound;
+      xPosition = canvas.width - cData.animation.width;
+    }else{
+      xPosition = checkMoveX;
+    }
+
+    // Check whether the new Y-positions exceed boundaries.
+    // Rebound if it's the roof.
+    // Stop falling if it's the ground and tell everyone we've landed
+    if(checkMoveY < 0){
+      yVelocity *= rebound;
+      yPosition = 0;
+    }else if(checkMoveY > canvas.height - cData.animation.height){
+      yPosition = canvas.height - cData.animation.height;
+      yVelocity = -gravity;
+      onGround = true;
+    }else{
+      yPosition = checkMoveY;
+    }
+
+    // Draw it!!!!!
+    context.drawImage(
+        img, 
+        spriteMapXPosition, 0, cData.animation.width, cData.animation.height, 
+        xPosition, yPosition, cData.animation.width, cData.animation.height );
+  };
 
 // Cycles through the sprite sheet printing the bounce animation.
 // Then calls the draw function to redraw the canvas.
-Character.prototype.bounce = function(){
-  "use strict";
+//
+// This function is defined and immediately executed, calling itself recursively.
 
-  var self                  = this;
+  var bounce = function(){
 
-  //Clear the canvas
-  this.context.clearRect(0, 0, this.context.canvas.clientWidth, this.context.canvas.clientHeight);
+    //Clear the canvas
+    context.clearRect(0, 0, context.canvas.clientWidth, context.canvas.clientHeight);
 
-  //Toggle which way the sprite sheet is being read and as a result the direction of the bounce
-  if(this.spriteMapXPosition <= 240){
-    this.toggleDirection = true;
-  }else if(this.spriteMapXPosition >= 384){
-    this.toggleDirection = false;
-  }
+    //Toggle which way the sprite sheet is being read and as a result the direction of the bounce
+    if(spriteMapXPosition <= 240){
+      toggleDirection = true;
+    }else if(spriteMapXPosition >= 384){
+      toggleDirection = false;
+    }
 
-  if(this.toggleDirection){
-    this.spriteMapXPosition += this.spriteImageWidth;
-  }else{
-    this.spriteMapXPosition -= this.spriteImageWidth;
-  }
-  
-  // Stop animation if in the air, instead show a single sprite image.
-  if(!this.onGround){
-    this.spriteMapXPosition = 288;
-    this.toggleDirection = false;
-  }
+    if(toggleDirection){
+      spriteMapXPosition += cData.animation.width;
+    }else{
+      spriteMapXPosition -= cData.animation.width;
+    }
+    
+    // Stop animation if in the air, instead show a single sprite image.
+    if(!onGround){
+      spriteMapXPosition = 288;
+      toggleDirection = false;
+    }
 
-  // Draw and recall itself to repeat.
-  this.draw();
-  if(this.alive){
-    setTimeout(function(){ self.bounce(); }, this.drawSpeed);
-  }
-};
+    // Draw and recall itself to repeat.
+    draw();
+    if(alive){
+      setTimeout(function(){ bounce(); }, drawSpeed);
+    }
+  };
+  that.bounce = bounce;
 
-// Controls where the image is placed on the canvas and the outputs it to the canvas.
-// Placement is determined by keyboard interaction.
-
-Character.prototype.draw = function(){
-  "use strict";
-  var friction;
-
-  // If no left/right input has been pressed set friction to slow down.
-  if(!this.left && !this.right){
-    friction = this.friction;
-  }else{
-    friction = 1;
-  }
-
-  // If jump was pressed while on the ground,
-  // Jump and let everyone know we aren't on the ground.
-  // Also cancel friction while in the air (gravity is all
-  // that matters).
-  if(this.jump && this.onGround){
-    this.yVelocity += this.jumpForce;
-    this.onGround = false;
-    friction = 1;
-  }
-
-  // Increment the acceleration left/right for a smoother experience.
-  if(this.left && !this.right){
-    this.xVelocity -= this.xAcceleration;
-  }else if(this.right && !this.left){
-    this.xVelocity += this.xAcceleration;
-  }
-
-  //Apply friction if we are on the ground.
-  if(this.onGround){
-    this.xVelocity *= friction;
-  }
-  this.yVelocity += this.gravity;
-
-  // Check if we are travelling at the maximum speed and
-  // if so refrain from increasing further.
-  // For jumping be more relaxed
-  if(this.xVelocity > this.speedLimit){
-    this.xVelocity = this.speedLimit;
-  }else if(this.xVelocity < -this.speedLimit){
-    this.xVelocity = -this.speedLimit;
-  }else if(this.yVelocity > this.speedLimit * 2){
-    this.yVelocity = this.speedLimit * 2;
-  }
-
-  // Set the new positions.
-  var checkMoveX = this.xPosition + this.xVelocity;
-  var checkMoveY = this.yPosition + this.yVelocity;
-
-  // Check whether the new X-positions exceed boundaries.
-  // If the do rebound
-  if(checkMoveX < 0){
-    this.xVelocity *= this.rebound;
-    this.xPosition = 0;
-  }else if(checkMoveX > this.canvas.width - this.spriteImageWidth){
-    this.xVelocity *= this.rebound;
-    this.xPosition = this.canvas.width - this.spriteImageWidth;
-  }else{
-    this.xPosition = checkMoveX;
-  }
-
-  // Check whether the new Y-positions exceed boundaries.
-  // Rebound if it's the roof.
-  // Stop falling if it's the ground and tell everyone we've landed
-  if(checkMoveY < 0){
-    this.yVelocity *= this.rebound;
-    this.yPosition = 0;
-  }else if(checkMoveY > this.canvas.height - this.spriteImageHeight){
-    this.yPosition = this.canvas.height - this.spriteImageHeight;
-    this.yVelocity = -this.gravity;
-    this.onGround = true;
-  }else{
-    this.yPosition = checkMoveY;
-  }
-
-  // Draw it!!!!!
-  this.context.drawImage(
-      this.img, 
-      this.spriteMapXPosition, 0, this.spriteImageWidth, this.spriteImageHeight, 
-      this.xPosition, this.yPosition, this.spriteImageWidth, this.spriteImageHeight );
-};
+  return that;
+}
