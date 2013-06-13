@@ -130,9 +130,6 @@ var character = function (cData, startYPosition){
 
 // Cycles through the sprite sheet printing the bounce animation.
 // Then calls the draw function to redraw the canvas.
-//
-// This function is defined and immediately executed, calling itself recursively.
-
   var bounce = function(){
 
     //Clear the canvas
@@ -163,7 +160,7 @@ var character = function (cData, startYPosition){
       setTimeout(function(){ bounce(); }, drawSpeed);
     }
   };
-  that.bounce = bounce;
+  that.bounce = bounce; //Assign the function to that{} to prvent clobbering.
 
   return that;
 }
