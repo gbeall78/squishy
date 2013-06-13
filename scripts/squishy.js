@@ -25,7 +25,8 @@ var game = (function() {
 
       //load level.
 
-      player = new Character(playerData, level.floor);
+       player = character(playerData, level.floor);
+       player.bounce();
       
     },
 
