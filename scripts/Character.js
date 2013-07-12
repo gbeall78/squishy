@@ -6,7 +6,7 @@ var character = function (cData, startYPosition){
   var alive                 = true;
   var img                   = new Image();
   var canvas                = document.createElement("canvas");
-  var context              = "";
+  var context               = "";
   
   var drawSpeed            = 100;
   var xPosition            = 0;
@@ -42,13 +42,26 @@ var character = function (cData, startYPosition){
     
   img.src = IMAGE_PATH + cData.imgFile;
   yPosition = startYPosition - cData.animation.height;
-  canvas.style.zIndex = "1";
+  canvas.style.zIndex = "10";
 
+  var setViewport = function(value){
+    try{
+      for(var x = 0; x < cData.animation.width; x++){
+        for(var y = 0; y < cData.animation.height; y++){
+            that.viewport[xPosition + x][yPosition + y] = value;
+          }
+        }
+    }catch(e){
+      console.log(e);
+    }
+  }
 
   // Controls where the image is placed on the canvas and the outputs it to the canvas.
   // Placement is determined by keyboard interaction.
 
   var draw = function(){
+
+    setViewport('');  //Clear current viewport
 
     // If no left/right input has been pressed set friction to slow down.
     if(!that.left && !that.right){
@@ -95,8 +108,8 @@ var character = function (cData, startYPosition){
     var checkMoveX = xPosition + xVelocity;
     var checkMoveY = yPosition + yVelocity;
 
-    // Check whether the new X-positions exceed boundaries.
-    // If the do rebound
+    // Check whether the new X-position exceeds boundaries.
+    // If it does rebound
     if(checkMoveX < 0){
       xVelocity *= rebound;
       xPosition = 0;
@@ -104,10 +117,10 @@ var character = function (cData, startYPosition){
       xVelocity *= rebound;
       xPosition = canvas.width - cData.animation.width;
     }else{
-      xPosition = checkMoveX;
+      xPosition = Math.round(checkMoveX);
     }
 
-    // Check whether the new Y-positions exceed boundaries.
+    // Check whether the new Y-position exceeds boundaries.
     // Rebound if it's the roof.
     // Stop falling if it's the ground and tell everyone we've landed
     if(checkMoveY < 0){
@@ -118,8 +131,10 @@ var character = function (cData, startYPosition){
       yVelocity = -gravity;
       onGround = true;
     }else{
-      yPosition = checkMoveY;
+      yPosition = Math.round(checkMoveY);
     }
+
+    setViewport('player');
 
     // Draw it!!!!!
     context.drawImage(

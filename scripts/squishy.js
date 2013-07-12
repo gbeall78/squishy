@@ -2,6 +2,8 @@ var game = (function() {
   "use strict";
   
   var body          = document.getElementsByTagName("body");
+  var viewport      = [];   //Contains the locations of currently viewable items
+  var platforms     = {};
   var player        = {};
 
   function getJson(file){
@@ -13,8 +15,29 @@ var game = (function() {
     return JSON.parse(request.responseText);
   }
 
+
+  var setViewport = function(x, y, width, height, value){
+    try{
+      for(var i = 0; i < width; i++){
+        for(var j = 0; j < height; j++){
+          viewport[x + i][y + j] = value;
+        }
+      }
+    }catch(e){
+      console.log(e);
+    }
+  }
+
   return {
     run: function(){
+
+      for(var x = 0; x < VIEWPORT_WIDTH; x++){
+        viewport[x] = [];
+        for(var y = 0; y < VIEWPORT_HEIGHT; y++){
+          viewport[x][y] = '';
+        }
+      }
+
       var gameboard = document.getElementById("gameboard").getContext("2d");
 
       var playerData = getJson("player");
@@ -24,10 +47,14 @@ var game = (function() {
       gameboard.canvas.width = gameboard.canvas.clientWidth;
 
       //load level.
+      //
 
-       player = character(playerData, level.floor);
-       player.bounce();
-      
+      platforms = platform(level.platform);
+      platforms.viewport = viewport;
+
+      player = character(playerData, level.floor);
+      player.viewport = viewport;
+      player.bounce();
     },
 
     userInput: function(e){
