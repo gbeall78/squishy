@@ -25,7 +25,7 @@ var character = function (cData, startYPosition){
   var rebound              = -0.7;
   var jumpForce            = -20;
   var gravity              = 2;
-  var onGround             = undefined;
+  var onGround             = true;
 
   that.left                 = false;
   that.right                = false;
@@ -44,24 +44,17 @@ var character = function (cData, startYPosition){
   yPosition = startYPosition - cData.animation.height;
   canvas.style.zIndex = "10";
 
-  var setViewport = function(value){
-    try{
-      for(var x = 0; x < cData.animation.width; x++){
-        for(var y = 0; y < cData.animation.height; y++){
-            that.viewport[xPosition + x][yPosition + y] = value;
-          }
-        }
-    }catch(e){
-      console.log(e);
-    }
-  }
-
   // Controls where the image is placed on the canvas and the outputs it to the canvas.
   // Placement is determined by keyboard interaction.
 
   var draw = function(){
 
-    setViewport('');  //Clear current viewport
+    clearViewportValue(
+        that.viewport, 
+        xPosition, 
+        yPosition, 
+        cData.animation.width, 
+        cData.animation.height, 'player');  //Clear current viewport
 
     // If no left/right input has been pressed set friction to slow down.
     if(!that.left && !that.right){
@@ -90,8 +83,10 @@ var character = function (cData, startYPosition){
     //Apply friction if we are on the ground.
     if(onGround){
       xVelocity *= friction;
+      yVelocity = 0;
+    }else{
+      yVelocity += gravity;
     }
-    yVelocity += gravity;
 
     // Check if we are travelling at the maximum speed and
     // if so refrain from increasing further.
@@ -105,8 +100,16 @@ var character = function (cData, startYPosition){
     }
 
     // Set the new positions.
-    var checkMoveX = xPosition + xVelocity;
-    var checkMoveY = yPosition + yVelocity;
+    var checkMoveX = Math.round(xPosition + xVelocity);
+    var checkMoveY = Math.round(yPosition + yVelocity);
+    
+    var collision   = {"ceiling":undefined, "floor":undefined, "left":undefined, "right":undefined};
+    collision = collisionTest(
+        that.viewport, 
+        checkMoveX, 
+        checkMoveY,
+        cData.animation.width,
+        cData.animation.height);
 
     // Check whether the new X-position exceeds boundaries.
     // If it does rebound
@@ -117,24 +120,40 @@ var character = function (cData, startYPosition){
       xVelocity *= rebound;
       xPosition = canvas.width - cData.animation.width;
     }else{
-      xPosition = Math.round(checkMoveX);
+      xPosition = checkMoveX;
     }
 
     // Check whether the new Y-position exceeds boundaries.
-    // Rebound if it's the roof.
-    // Stop falling if it's the ground and tell everyone we've landed
-    if(checkMoveY < 0){
-      yVelocity *= rebound;
-      yPosition = 0;
-    }else if(checkMoveY > canvas.height - cData.animation.height){
-      yPosition = canvas.height - cData.animation.height;
+
+    //Hit roof
+    if(checkMoveY <= 0){
+        yVelocity *= rebound;
+        checkMoveY = 0;
+    //Landed on floor
+    }else if(checkMoveY >= canvas.height - cData.animation.height){
       yVelocity = -gravity;
       onGround = true;
-    }else{
-      yPosition = Math.round(checkMoveY);
+      checkMoveY = canvas.height - cData.animation.height;
+    //Hit platform
+    }else if(collision.ceiling !== -1){
+      yVelocity *= rebound;
+      checkMoveY = collision.ceiling;
+    }else if(collision.floor !== -1){
+      onGround = true;
+      yVelocity = -gravity;
+      checkMoveY = collision.floor
+    }else if(collision.floor == -1){
+      onGround = false;
     }
+    yPosition = checkMoveY;
 
-    setViewport('player');
+    setViewport(
+        that.viewport, 
+        xPosition, 
+        yPosition, 
+        cData.animation.width, 
+        cData.animation.height, 
+        'player');
 
     // Draw it!!!!!
     context.drawImage(
@@ -175,7 +194,7 @@ var character = function (cData, startYPosition){
       setTimeout(function(){ bounce(); }, drawSpeed);
     }
   };
-  that.bounce = bounce; //Assign the function to that{} to prvent clobbering.
+  that.bounce = bounce; //Assign the function to that{} to prevent clobbering.
 
   return that;
 }
