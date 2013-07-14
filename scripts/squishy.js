@@ -3,7 +3,7 @@ var game = (function() {
   
   var body          = document.getElementsByTagName("body");
   var viewport      = [];   //Contains the locations of currently viewable items
-  var platforms     = {};
+  var platforms     = [];
   var player        = {};
 
   function getJson(file){
@@ -13,19 +13,6 @@ var game = (function() {
     request.send();
 
     return JSON.parse(request.responseText);
-  }
-
-
-  var setViewport = function(x, y, width, height, value){
-    try{
-      for(var i = 0; i < width; i++){
-        for(var j = 0; j < height; j++){
-          viewport[x + i][y + j] = value;
-        }
-      }
-    }catch(e){
-      console.log(e);
-    }
   }
 
   return {
@@ -42,16 +29,17 @@ var game = (function() {
 
       var playerData = getJson("player");
       var level = getJson("level/1");
-      
+
       gameboard.canvas.height = gameboard.canvas.clientHeight;
       gameboard.canvas.width = gameboard.canvas.clientWidth;
 
       //load level.
       //
 
-      platforms = platform(level.platform);
-      platforms.viewport = viewport;
-
+      for(var i = 0; level.platform[i] !== undefined; i++){
+        platforms.push(platform(i, level.platform[i], viewport));
+      }
+      
       player = character(playerData, level.floor);
       player.viewport = viewport;
       player.bounce();
@@ -73,6 +61,7 @@ var game = (function() {
         default:
           break;
       }
+      event.preventDefault();
     },
 
     noUserInput: function(e){
@@ -91,6 +80,7 @@ var game = (function() {
         default:
           break;
       }
+      event.preventDefault();
     }
   };
 }());
