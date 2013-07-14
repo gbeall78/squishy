@@ -6,9 +6,6 @@ var setViewport = function(viewport, x, y, width, height, value){
       for(var j = 0; j < height; j++){
         if(viewport[x + i][y + j] === ''){
           viewport[x + i][y + j] = value;
-          if(value == 'player'){
-            //console.log("viewport[" . x + i . "][" . y + j . "]");
-          }
         }
       }
     }
